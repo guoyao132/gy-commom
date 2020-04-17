@@ -1,19 +1,12 @@
-import msg from './msg/msg'
 import common from './common'
+
+import './css/reset.css'
 
 let plugins = {};
 
 plugins.install = function(Vue, option){
-
-  //自定义指令
-  Vue.directive("focus", {
-    inserted: function(el){
-      el.focus();
-    },
-  })
-
-  Vue.prototype.$common = common;
-  Vue.component(msg.name, msg);
+  Vue.prototype.$gyCom = common;
+  window.gyVue = Vue;
 }
 
 export default plugins;

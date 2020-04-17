@@ -5,6 +5,10 @@ import store from './store'
 
 Vue.config.productionTip = false
 
+import plugins from './plugins/index'
+
+Vue.use(plugins)
+
 new Vue({
   router,
   store,

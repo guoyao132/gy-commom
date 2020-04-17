@@ -1,29 +1,32 @@
 {
   "name": "gy-common",
   "description": "gy",
-  "keywords": ["gy"],
-  "version": "0.1.0",
+  "keywords": [
+    "gy"
+  ],
+  "version": "0.1.7",
   "license": "MIT",
   "private": false,
-  "files": ["lib"],
-  "main": "lib/gy-common-umd.js",
+  "files": [
+    "lib"
+  ],
+  "main": "lib/gy-common.umd.js",
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
-    "lib": "vue-cli-service build --target lib -name gy-common --dest lib1 src/plugins/index.js"
+    "lib": "vue-cli-service build --target lib -name gy-common --dest lib src/plugins/index.js"
   },
-
   "repository": {
     "type": "git",
     "url": "git@github.com:guoyao132/gy-commom.git"
   },
   "dependencies": {
+  },
+  "devDependencies": {
     "core-js": "^3.6.4",
     "vue": "^2.6.11",
     "vue-router": "^3.1.5",
-    "vuex": "^3.1.2"
-  },
-  "devDependencies": {
+    "vuex": "^3.1.2",
     "@vue/cli-plugin-babel": "^4.2.0",
     "@vue/cli-service": "^4.2.0",
     "less": "^3.0.4",
