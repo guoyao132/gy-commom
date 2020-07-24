@@ -1,29 +1,50 @@
-# gy-common
+# 共用方法
 
-## Project setup
+## 浮点数加减乘除（floatAdd/floatSub/floatMul/floatDiv）
 ```
-npm install
-```
-
-### Compiles and hot-reloads for development
-```
-npm run serve
+params:
+    num1 (Number), 
+    num2 (Number)
 ```
 
-### Compiles and minifies for production
+### 格式化日期(formatTime)
 ```
-npm run build
+params: 
+    time: Date || string(时间格式)
+    type： 'ymd' || 'hms' || 'y-m-d h:m:s'(自定义时间格式，y -> yy 年份取后两位)
 ```
-
-### Run your tests
+### 判断是否是数字(isRealNum)
 ```
-npm run test
+params: 
+    val(排除空字符串和null的影响)
 ```
-
-### Lints and fixes files
+### 格式化科学计数法的数字(formatNum)
 ```
-npm run lint
+params: 
+    number(数字太长在浏览器中会自动转换为科学计数法)
 ```
-
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
+### 判断是否是数字(isRealNum)
+```
+params: 
+    val(排除空字符串和null的影响)
+```
+### 判断是否是数字(isRealNum)
+```
+params: 
+    val(排除空字符串和null的影响)
+```
+### 判断是否是数字(isRealNum)
+```
+params: 
+    val(排除空字符串和null的影响)
+```
+### 判断是否是数字(isRealNum)
+```
+params: 
+    val(排除空字符串和null的影响)
+```
+### 判断是否是数字(isRealNum)
+```
+params: 
+    val(排除空字符串和null的影响)
+```

@@ -1,3 +1,5 @@
+import {validatorMessage} from './validator'
+
 export default {
   //浮点数减法
   floatSub: function (num1, num2) {
@@ -42,7 +44,7 @@ export default {
    *      hms 返回 h:m:s
    *      ymd 返回 y-m-d
    *      其他或者不传为：y-m-d h:m:s
-   * customFormat 自定义返回时间格式
+   *     自定义返回时间格式
    *      例 y-m-d h:M:s、 yy/m/d、h:M:s、m/d h:M:s
    *      y:年，yy:年后两位，m:月，d:日，h:时，M:分，s: 秒
    *
@@ -110,7 +112,7 @@ export default {
     return new Date(year, month, 0).getDate();
   },
   //复制对象
-  copyFn(obj) {
+  copyObjFn(obj) {
     if (obj == null) {
       return null
     }
@@ -125,5 +127,196 @@ export default {
       }
     }
     return result;
-  }
+  },
+  /*
+  * author: g
+  * time: 2020/7/16 10:52
+  * @desc 根据键名比较获取对应的另一个键名的值
+  * @params1 val 判断值
+  * @params2 list 数组或对象
+  * @params3 idCol 需要比较的键名
+  * @params4 nameCol 需要获取的键名
+  */
+  getNameById(val, list, idCol, nameCol) {
+    if (list) {
+      for (let i in list) {
+        if (list[i][idCol] == val)
+          return list[i][nameCol];
+      }
+    }
+    return null;
+  },
+
+  /*
+  * author: g
+  * time: 2020/7/17 17:58
+  * @desc 树列表中 通过value和valuekey 获取指定key的值
+  * @params1 treeData
+  * @params2 valueKey
+  * @params3 value
+  * @params4 key
+  */
+  getTreeKeyByValkey(treeData, valueKey, value, key) {
+    let result = '';
+
+    // 递归
+    let recursion = (treeData, valueKey) => {
+      // treeData数据为空的时候直接返回
+      if (!treeData || !treeData.length) {
+        return;
+      }
+
+      for (let i = 0, len = treeData.length; i < len; i++) {
+        let childs = treeData[i].children;
+        if (treeData[i][valueKey] == value) {
+          result = treeData[i][key]
+        }
+        if (childs && childs.length > 0) {
+          recursion(childs, valueKey);
+        }
+      }
+      return result || '';
+    };
+
+    return recursion(treeData, valueKey);
+  },
+  /*
+ * author: g
+ * time: 2020/7/16 10:58
+ * @desc 表单验证
+ * @params1 formData
+ * @params2 验证规则对象
+ */
+  formDataValidator(formData, validatorObj){
+    for (let item of Object.values(validatorObj)) {
+      if (item.required || item.type || item.len) {
+        if (!validatorMessage({
+          require: item.required,
+          value: formData[item.prop],
+          name: item.label,
+          type: item.type || (item.len ? 'lenControl' : ''),
+          len: item.len,
+          isDigital: item.isDigital
+        })) {
+          return false
+        }
+      }
+    }
+    return true
+  },
+  /*
+  * author: g
+  * time: 2020/7/17 17:51
+  * @desc 格式化echarts数据，将数据变为一个数组，x为value的数组
+  * @params1 xData x周的数据数组(需要年月日时分秒)
+  * @params2 yData y周的数据数组
+  */
+  formatEchatsData(xData, yData) {
+    let newArrData = [];
+    let xNewData = [];
+    let yNewData = [];
+    if (Array.isArray(xData)) {
+      let xIndex = 0;
+      // "2017-10-01 10:01:01"
+      xData.forEach((v, i) => {
+        let arr1 = v.split(" ");
+        let time = arr1.length > 1 ? arr1[1] : arr1[0];
+        let arr2 = time.split(":");
+        let xHour = parseFloat(arr2[0]);
+        if (xHour == xIndex) {
+          if (i === 0) {
+            if (parseFloat(arr2[1]) !== 0) {
+              xNewData.push(0);
+              yNewData.push(null);
+              newArrData.push([0, null]);
+              let arr22 = 0;
+              if (arr2[2]) {
+                arr22 = arr2[2];
+              }
+              let x = parseFloat(arr2[0]) + (parseFloat(arr2[1]) / 60) + (parseFloat(arr22) / 3600);
+              xNewData.push(x);
+              yNewData.push(yData[i]);
+              newArrData.push([x, yData[i]]);
+            } else {
+              xNewData.push(0);
+              yNewData.push(yData[i]);
+              newArrData.push([0, yData[i]]);
+            }
+          } else {
+            let arr22 = 0;
+            if (arr2[2]) {
+              arr22 = arr2[2];
+            }
+            let x = parseFloat(arr2[0]) + (parseFloat(arr2[1]) / 60) + (parseFloat(arr22) / 3600);
+            xNewData.push(x);
+            yNewData.push(yData[i]);
+            newArrData.push([x, yData[i]]);
+          }
+        } else {
+          let len = xHour - xIndex;
+          if (i === 0) {
+            xNewData.push(0);
+            yNewData.push(null);
+            newArrData.push([0, null]);
+          }
+          for (let j = 1; j < len; j++) {
+            xNewData.push(xIndex + j);
+            if (yNewData.length > 0) {
+              //是否需要给有间隔的数据添加数据
+              // yNewData.push(yNewData[yNewData.length - 1]);
+              // newArrData.push([xIndex + j, yNewData[yNewData.length - 1]]);
+            } else {
+              yNewData.push(null);
+              newArrData.push([xIndex + j, null]);
+            }
+          }
+          if (parseFloat(arr2[1]) !== 0) {
+            //是否需要给有间隔的数据添加数据
+            // xNewData.push(parseFloat(arr2[0]));
+            // yNewData.push(yNewData[yNewData.length - 1]);
+            // newArrData.push([parseFloat(arr2[0]), yNewData[yNewData.length - 1]]);
+            let arr22 = 0;
+            if (arr2[2]) {
+              arr22 = arr2[2];
+            }
+            let x = parseFloat(arr2[0]) + (parseFloat(arr2[1]) / 60) + (parseFloat(arr22) / 3600);
+            x = parseFloat(x.toFixed(2));
+            xNewData.push(x);
+            yNewData.push(yData[i]);
+            newArrData.push([x, yData[i]]);
+          } else {
+            let arr22 = 0;
+            if (arr2[2]) {
+              arr22 = arr2[2];
+            }
+            let x = parseFloat(arr2[0]) + (parseFloat(arr2[1]) / 60) + (parseFloat(arr22) / 3600);
+            x = parseFloat(x.toFixed(2));
+            xNewData.push(x);
+            yNewData.push(yData[i]);
+            newArrData.push([x, yData[i]]);
+          }
+        }
+        xIndex = xHour;
+      })
+      return newArrData
+    } else {
+      return [];
+    }
+  },
+
+  //将时分秒变为数字
+  formatHourToNum(v) {
+    if (!v) {
+      v = '';
+    }
+    let arr1 = v.split(" ");
+    let time = arr1.length > 1 ? arr1[1] : arr1[0];
+    let arr2 = time.split(":");
+    let arr22 = 0;
+    if (arr2[2]) {
+      arr22 = arr2[2];
+    }
+    let x = parseFloat(arr2[0]) + (parseFloat(arr2[1]) / 60) + (parseFloat(arr22) / 3600);
+    return x;
+  },
 }
