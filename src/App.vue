@@ -4,7 +4,9 @@
   </div>
 </template>
 <script>
-
+  import {EarthModel} from './plugins/index'
+  import {ThreeModel} from './plugins/index'
+  import a from './plugins/index'
   export default {
     name: 'App',
     data: function () {
@@ -13,7 +15,9 @@
     methods: {
     },
     mounted: function () {
-      window.gyCom = this.$gyCom;
+      console.log(a);
+      console.log(EarthModel);
+      console.log(ThreeModel);
     },
   }
 </script>

@@ -146,7 +146,6 @@ export default {
     }
     return null;
   },
-
   /*
   * author: g
   * time: 2020/7/17 17:58
@@ -303,7 +302,6 @@ export default {
       return [];
     }
   },
-
   //将时分秒变为数字
   formatHourToNum(v) {
     if (!v) {
