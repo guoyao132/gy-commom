@@ -15,8 +15,23 @@ var HOTTHIS = null;
 // var INITINTERVAL=null;
 
 export default {
+  bd09togcj02(lon, lat){
+    return bd09togcj02(Number(lon), Number(lat));
+  },
+  gcj02tobd09(lon, lat){
+    return gcj02tobd09(Number(lon), Number(lat));
+  },
+  wgs84togcj02(lon, lat){
+    return wgs84togcj02(Number(lon), Number(lat));
+  },
   gcj02towgs84(lon, lat){
     return gcj02towgs84(Number(lon), Number(lat));
+  },
+  bd09towgs84(lon, lat){
+    return bd09towgs84(Number(lon), Number(lat));
+  },
+  wgs84tobd09(lon, lat){
+    return wgs84tobd09(Number(lon), Number(lat));
   },
   deepMerge(obj1, obj2) {
     let key;
@@ -500,12 +515,6 @@ _obj:需删除的对象
     return x;
   },
 
-  timeToCh: function (time) {
-    var newTime = time.slice(0, 11)
-    var T = newTime.split('-');
-    return T[0] + '年' + T[1] + '月' + T[2] + '日'
-  },
-
   tableRowClassName: function ({row, rowIndex}) {
     if (rowIndex % 2 == 1) {
       return 'lightColor';
@@ -579,7 +588,12 @@ _obj:需删除的对象
 
     return recursion(treeData, id);
   },
-
+  /*
+  * idToValueByKeyDefined
+  * @gy
+  * @2021/3/11 17:57
+  * @description 根据id获取对应key值
+  */
   idToValueByKeyDefined(treeData, id, key) {
     let result = '';
 
@@ -604,6 +618,13 @@ _obj:需删除的对象
 
     return recursion(treeData, id);
   },
+
+  /*
+  * idToValueDefinedByKeyDefined
+  * @gy
+  * @2021/3/11 17:57
+  * @description 根据指定valuekey和指定的value值获取对应key值
+  */
   idToValueDefinedByKeyDefined(treeData, valueKey, value, key) {
     let result = '';
 
@@ -749,14 +770,14 @@ _obj:需删除的对象
   },
 
   //小数乘法
-  floarMul: function (num1, num2) {
+  flortMul: function (num1, num2) {
     var m = 0, s1 = num1.toString(), s2 = num2.toString();
     try { m += s1.split(".")[1].length } catch (e) { }
     try { m += s2.split(".")[1].length } catch (e) { }
     return Number(s1.replace(".", "")) * Number(s2.replace(".", "")) / Math.pow(10, m);
   },
   //除法
-  floarDiv: function (num1, num2) {
+  flortDiv: function (num1, num2) {
     if (num2 == 0) {
       return 0;
     }
@@ -774,7 +795,7 @@ _obj:需删除的对象
     return (r1 / r2) * Math.pow(10, t2 - t1);
   },
   //小数加法
-  floarAdd: function (num1, num2) {
+  flortAdd: function (num1, num2) {
     var r1, r2, m;
     try {
       r1 = num1.toString().split(".")[1].length
@@ -790,7 +811,7 @@ _obj:需删除的对象
     return Math.round(num1 * m + num2 * m) / m;
   },
   //小数减法
-  floarSub: function (num1, num2) {
+  flortSub: function (num1, num2) {
     let r1, r2, m;
     try {
       r1 = num1.toString().split('.')[1].length;

@@ -4,12 +4,13 @@
   "keywords": [
     "gy"
   ],
-  "version": "0.2.8",
+  "version": "0.2.11",
   "license": "MIT",
   "private": false,
   "files": [
     "lib",
-    "src/plugins"
+    "src/plugins",
+    "example"
   ],
   "main": "lib/gy-common.umd.js",
   "scripts": {
