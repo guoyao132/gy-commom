@@ -1,4 +1,3 @@
-import {Message} from 'element-ui'
 // 正则
 let regexp = {
   isPassword: function (str) { //密码验证

@@ -50,12 +50,6 @@ export default {
     }
     return obj1;
   },
-
-  //将表格空值变为0
-  formatterTableDate(row, column, cellValue, index){
-    let val = cellValue.split ? cellValue.split(" ")[0] : cellValue;
-    return val;
-  },
   /*
   * author: g
   * time: 2020/9/7 15:34
@@ -258,10 +252,10 @@ export default {
 _arr:数组
 _obj:需删除的对象
 */
-  removeArray(_arr, _obj) {
+  removeArray(_arr, _obj, key = 'id') {
     var length = _arr.length;
     for (var i = 0; i < length; i++) {
-      if (_arr[i].id == _obj) {
+      if (_arr[i][key] == _obj) {
         if (i == 0) {
           _arr.shift(); //删除并返回数组的第一个元素
           return _arr;
@@ -275,30 +269,6 @@ _obj:需删除的对象
       }
     }
   },
-
-  /*
-  通过 'id' 删除数组中的某一个对象
-_arr:数组
-_obj:需删除的对象
-*/
-  removeArrayById(_arr, _obj) {
-    var length = _arr.length;
-    for (var i = 0; i < length; i++) {
-      if (_arr[i].id == _obj.id) {
-        if (i == 0) {
-          _arr.shift(); //删除并返回数组的第一个元素
-          return _arr;
-        } else if (i == length - 1) {
-          _arr.pop();  //删除并返回数组的最后一个元素
-          return _arr;
-        } else {
-          _arr.splice(i, 1); //删除下标为i的元素
-          return _arr;
-        }
-      }
-    }
-  },
-
   /*
   * author: g
   * time: 2020/7/16 10:58
@@ -858,8 +828,10 @@ _obj:需删除的对象
       return data
     }
     let keyType = "";
+    let mList = {};
+    let prevKey = null;
     merge.forEach((m, i) => {
-      const mList = {};
+      mList = {};
       data = data.map((v, index) => {
         const rowVal = v[m];
         if (i != 0) {
@@ -871,6 +843,10 @@ _obj:需删除的对象
           keyType = str;
         }
         let key = keyType + rowVal;
+        if(prevKey && (key != prevKey) && mList[key]){
+          mList[key] = null;
+        }
+        prevKey = key;
         if (mList[key]) {
           mList[key]++
           data[index - (mList[key] - 1)][m + '-span'].rowspan++
@@ -889,28 +865,6 @@ _obj:需删除的对象
       })
     })
     return data;
-  },
-
-  //HPLC获取字典表
-  getHplcDict(vue, type, arrName) {
-    vue.$dxcjAjax.getHplcDict({
-      dictType: type,
-    }).then(resp => {
-      let result = resp.result;
-      let obj = {};
-      if (result) {
-        if (Array.isArray(result)) {
-          result.forEach(v => {
-            obj[v.value] = {
-              name: v.label
-            }
-          })
-
-        }
-      }
-      if (vue.$data[arrName])
-        vue.$data[arrName] = obj;
-    })
   },
 
   //接口数组转为对象
@@ -947,7 +901,40 @@ _obj:需删除的对象
     }
     toArr(tree, child);
     return lists;
+  },
+
+  type(para) {
+    return Object.prototype.toString.call(para)
+  },
+  unique(arr) {
+    return [...new Set(arr)]
+  },
+  inherit(Target, Origin) {
+    function F() {};
+    F.prototype = Origin.prototype;
+    Target.prototype = new F();
+    Target.prototype.constructor = Target;
+    // 最终的原型指向
+    Target.prop.uber = Origin.prototype;
+  },
+  getUrlParam(sKey) {
+    let sUrl = location.href;
+    var result = {};
+    sUrl.replace(/(\w+)=(\w+)(?=[&|#])/g, function (ele, key, val) {
+      if (!result[key]) {
+        result[key] = val;
+      } else {
+        var temp = result[key];
+        result[key] = [].concat(temp, val);
+      }
+    })
+    if (!sKey) {
+      return result;
+    } else {
+      return result[sKey] || '';
+    }
   }
+
 }
 
 
