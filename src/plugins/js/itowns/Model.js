@@ -1,5 +1,6 @@
 import * as THREE from 'three'
 
+import BASTURL from "../../../api/URL_PROXY.js"
 const itowns = require('itowns')
 import {EffectComposer} from "three/examples/jsm/postprocessing/EffectComposer";
 import {RenderPass} from "three/examples/jsm/postprocessing/RenderPass";
@@ -52,12 +53,16 @@ class Model {
   constructor(vue, contenerId, opt) {
     this.vue = vue;
     this.isFirst = true;
+    this.isDebug = opt.isDebug || false;
     // this.hasMap = false;
     this.hasMap = true;
     this.view = null;
     this.itowns = itowns;
     this.contenerId = contenerId;
-    const BASTURL = opt.BASTURL;
+    // this.mapURL = BASTURL + '/map/gaodeMap/mapabc/roadmap/${z}/${x}/${y}.png';
+    // this.mapURL = BASTURL + '/map/gaodeMap/googleMap/googlemaps/roadmap/${z}/${x}/${y}.png';
+    // this.mapURL = BASTURL + '/map/gaodeMap/googleMap/googlemaps/roadmap1/${z}/${x}/${y}.png';
+    // this.mapURL = BASTURL + '/map/gaodeMap/googleMap/googlemaps/roadmap2/${z}/${x}/${y}.jpg';
     this.mapURL = BASTURL + '/map/gaodeMap/googleMap/${z}/${x}/${y}.jpg';
 
     this.mapURL2 = './img/map_bg_2.png';
@@ -168,18 +173,14 @@ class Model {
   }
 
   getTextureImg() {
-    // this.lineTexture = new THREE.TextureLoader().load(require('../../map/dianlan.png'));
-    // this.weilanTexture = new THREE.TextureLoader().load(require('../../map/dianziweilan.png'));
-    // this.luwangTexture = new THREE.TextureLoader().load(require('../../map/luwang.png'));
-    // this.powerTexture_01 = new THREE.TextureLoader().load(require('../../map/powerStation_01.png')); // 供电关系贴图_01
-    // this.powerTexture_02 = new THREE.TextureLoader().load(require('../../map/powerStation_02.png')); // 供电关系贴图_02
+    this.lineTexture = new THREE.TextureLoader().load(require('../../imgs/map/dianlan.png'));
+    this.weilanTexture = new THREE.TextureLoader().load(require('../../imgs/map/dianziweilan.png'));
+    this.luwangTexture = new THREE.TextureLoader().load(require('../../imgs/map/luwang.png'));
+    // this.powerTexture_01 = new THREE.TextureLoader().load(require('../../imgs/map/powerStation_01.png')); // 供电关系贴图_01
+    // this.powerTexture_02 = new THREE.TextureLoader().load(require('../../imgs/map/powerStation_02.png')); // 供电关系贴图_02
   }
 
-  init3DModel() {
-    this.getTextureImg();
-    const self = this;
-    this.options.beforeInit.call(this);
-    // 绘制地图
+  initItowns(){
 
     // let extent = new itowns.Extent(
     //   'EPSG:3946',
@@ -234,30 +235,53 @@ class Model {
     this.mouse = mouse;
     this.scene = view.scene;
 
-    let cameraHelper = new THREE.CameraHelper(this.camera);
-    this.scene.add(cameraHelper);
-
-    window.view = view;
-    window.itowns = itowns;
+    if(this.isDebug){
+      let cameraHelper = new THREE.CameraHelper(this.camera);
+      this.scene.add(cameraHelper);
+      window.view = view;
+      window.itowns = itowns;
+    }
 
     let meshLineGroup = new THREE.Object3D();
     this.meshLineGroup = meshLineGroup;
     this.scene.add(meshLineGroup);
-
+    //设置大小
     this.resolution = new THREE.Vector2(this.container.clientWidth, this.container.clientHeight);
 
     this.raycaster = new THREE.Raycaster();
 
+
+    //文字加载
+    var loader = new THREE.FontLoader();
+    this.font = loader.parse(FONT);
+
+  }
+
+  initLight(){
+
     //环境光
     this.ambientLight = new THREE.AmbientLight(0xffffff, 3);
     this.scene.add(this.ambientLight);
-
     // this.pointLight = new THREE.PointLight(0xffffff, 0.8);
     // this.camera.add(this.pointLight);
 
-    //地图参数控制值
-    this._initOrbitControls();
 
+    // const pmremGenerator = new THREE.PMREMGenerator(renderer); // 使用hdr作为背景色
+    // pmremGenerator.compileEquirectangularShader();
+    //
+    // new RGBELoader()
+    //   .setDataType(THREE.UnsignedByteType)
+    //   .load('/newmodel/black/yewan.hdr', function (texture) {
+    //     const envMap = pmremGenerator.fromEquirectangular(texture).texture;
+    //     // envMap.isPmremTexture = true;
+    //     pmremGenerator.dispose();
+    //
+    //     self.scene.environment = envMap; // 给场景添加环境光效果
+    //     self.scene.background = envMap; // 给场景添加背景图
+    //   });
+  }
+
+  initCssLabel(){
     //lable绘制
     let cssRenderer = new CSS2DRenderer();
     cssRenderer.setSize(this.container.clientWidth, this.container.clientHeight);
@@ -266,11 +290,9 @@ class Model {
     cssRenderer.domElement.style.zIndex = 2;
     this.container.appendChild(cssRenderer.domElement);
     this.cssRenderer = cssRenderer;
+  }
 
-    //文字加载
-    var loader = new THREE.FontLoader();
-    this.font = loader.parse(FONT);
-
+  initComposer(){
     // 外发光
     // this.outlinePass = new OutlinePass(new THREE.Vector2(this.container.clientWidth, this.container.clientHeight), this.scene, this.camera);
     // this.outlinePass.edgeStrength = 1.5;//包围线浓度
@@ -281,7 +303,7 @@ class Model {
     // this.outlinePass.hiddenEdgeColor.set('#1375E8');//被遮挡的边界线颜色
     // this.composer.addPass(this.outlinePass);
 
-    let renderer = view.mainLoop.gfxEngine.renderer;
+    let renderer = this.view.mainLoop.gfxEngine.renderer;
     this.composer = new EffectComposer(renderer);
     const renderScene = new RenderPass(this.scene, this.camera);
     this.composer.addPass(renderScene);
@@ -290,9 +312,6 @@ class Model {
     ssaaPass.unbiased = false;
     ssaaPass.sampleLevel = 3;
     //辉光
-    // const bloomPass = new UnrealBloomPass(new THREE.Vector2(this.container.clientWidth, this.container.clientHeight), 2,  0, 1);
-
-
     this.finalComposer = new EffectComposer(renderer);
     this.finalComposer.addPass(renderScene);
 
@@ -312,11 +331,11 @@ class Model {
 
     this.finalComposer.addPass(ssaaPass)
     this.finalComposer.addPass(finalPass)
-
-    // this.composer.addPass(bloomPass)
     this.composer.addPass(ssaaPass)
+  }
 
-
+  initRender(){
+    const self = this;
     function darkObjMaterial(obj) {
       let bloom = self.bloomArr || [];
       if (obj.isMesh && obj.visible === true) {
@@ -335,56 +354,11 @@ class Model {
       }
     }
 
-
-    // const pmremGenerator = new THREE.PMREMGenerator(renderer); // 使用hdr作为背景色
-    // pmremGenerator.compileEquirectangularShader();
-    //
-    // new RGBELoader()
-    //   .setDataType(THREE.UnsignedByteType)
-    //   .load('/newmodel/black/yewan.hdr', function (texture) {
-    //     const envMap = pmremGenerator.fromEquirectangular(texture).texture;
-    //     // envMap.isPmremTexture = true;
-    //     pmremGenerator.dispose();
-    //
-    //     self.scene.environment = envMap; // 给场景添加环境光效果
-    //     self.scene.background = envMap; // 给场景添加背景图
-    //   });
-
-
-    // var points = new THREE.Geometry();
-    // let a = this.getCoordXyz(116.389878,39.906479, 100);
-    // let b = this.getCoordXyz(116.393891,39.904438, 100);
-    // let c = this.getCoordXyz(116.397721,39.903466, 100);
-    // let d = this.getCoordXyz(116.400403,39.906726, 100);
-    // let xyz1 = new THREE.Vector3( a.x, a.y, a.z );
-    // let xyz2 = new THREE.Vector3( b.x, b.y, b.z );
-    // let xyz3 = new THREE.Vector3( c.x, c.y, c.z );
-    // let xyz4 = new THREE.Vector3( d.x, d.y, d.z );
-
-    // let xyz1 = this.changeCoordinates(116.389878,39.906479, 0);
-    // let xyz2 = this.changeCoordinates(116.389878,39.906479, 100);
-    // let xyz3 = this.changeCoordinates(116.389878,39.906479, 200);
-    // let xyz4 = this.changeCoordinates(116.389878,39.906479, 5000);
-    // // let xyz2 = this.changeCoordinates(116.393891,39.904438, 100);
-    // // let xyz3 = this.changeCoordinates(116.397721,39.903466, 100);
-    // // let xyz4 = this.changeCoordinates(116.400403,39.906726, 100);
-    // let xyzV1 = new THREE.Vector3(xyz1[0], xyz1[1], xyz1[2]);
-    // let xyzV2 = new THREE.Vector3(xyz2[0], xyz2[1], xyz2[2]);
-    // let xyzV3 = new THREE.Vector3(xyz3[0], xyz3[1], xyz3[2]);
-    // let xyzV4 = new THREE.Vector3(xyz4[0], xyz4[1], xyz4[2]);
-    //
-    // points.vertices.push(xyzV1);
-    // points.vertices.push(xyzV2);
-    // points.vertices.push(xyzV3);
-    // points.vertices.push(xyzV4);
-    // this.droeMeshLine(points);
-
-
     this.view.render = function render() {
       if (!self.view) {
         return;
       }
-      var g = view.mainLoop.gfxEngine;
+      var g = self.view.mainLoop.gfxEngine;
       var r = g.renderer
       self.animate();
       if (self.bloomArr.length != 0) {
@@ -396,8 +370,8 @@ class Model {
         self.composer.render();
       }
       g.label2dRenderer.render(self.scene, self.camera)
-      if (view.mainLoop.renderingState == 0) {
-        view.notifyChange();
+      if (self.view.mainLoop.renderingState == 0) {
+        self.view.notifyChange();
       }
 
       // if(view.mainLoop.renderingState = 0) {
@@ -406,6 +380,20 @@ class Model {
       //   });
       // }
     }
+  }
+
+  init3DModel() {
+    this.getTextureImg();
+    this.options.beforeInit.call(this);
+    // 绘制地图
+    this.initItowns();
+    let view = this.view;
+    this.initLight();
+    //地图参数控制值
+    this._initOrbitControls();
+    this.initCssLabel();
+    this.initComposer();
+    this.initRender();
     this.options.afterInit.call(this);
   }
 
@@ -482,8 +470,8 @@ class Model {
 
     geometry.computeBoundingSphere();
 
-    const texture = new THREE.TextureLoader().load(require('../../map/dianziweilan.png'));
-    // const texture = new THREE.TextureLoader().load( require('../../map/weilan.png'));
+    const texture = new THREE.TextureLoader().load(require('../../imgs/map/dianziweilan.png'));
+    // const texture = new THREE.TextureLoader().load( require('../../imgs/map/weilan.png'));
     texture.repeat = new THREE.Vector2(repeatX, 1);
     texture.wrapS = THREE.RepeatWrapping;
     texture.wrapT = THREE.RepeatWrapping;
@@ -572,11 +560,10 @@ class Model {
 
   animate() {
     let dealData = this.clock.getDelta();
-
-
     this.camera.updateProjectionMatrix();
     this.animationList.forEach(v => {
-      v.getMixer().update(dealData);
+      v[1].updateMatrixWorld();
+      v[0].getMixer().update(dealData);
     })
     this.loadFileOffsetMaterialArr.forEach(v => {
       let offsetMaterial = this.scene.getObjectByName(v.name);
@@ -789,7 +776,7 @@ class Model {
       curve = new THREE.CatmullRomCurve3(points, false);
       tubeGeometry = new THREE.TubeGeometry(curve, len, 9, 4, false);
 
-      powerTexture = new THREE.TextureLoader().load(require('../../map/powerStation_01.png'));
+      powerTexture = new THREE.TextureLoader().load(require('../../imgs/map/powerStation_01.png'));
 
       meshName = 'powerStation_' + new Date().getTime() + '_' + i;
 
@@ -1276,11 +1263,16 @@ class Model {
           }
           self.view.notifyChange();
 
-          if (fileConfig.isAnimation) {
+          // console.log(model);
+          if (fileConfig.isAnimation && model.animations && model.animations[0]) {
+            // if (fileConfig.isAnimation) {
             let mixer = new THREE.AnimationMixer(model);
             const action = mixer.clipAction(model.animations[0]);
             action.play();
-            self.animationList.push(action);
+            self.animationList.push([
+              action,
+              model,
+            ]);
           }
 
 
@@ -1531,11 +1523,11 @@ class Model {
       // 设置不同的分段数和贴图
 
       if(index == 0 || index == 1){
-        powerTexture = new THREE.TextureLoader().load(require('../../map/powerStation_02.png'));
+        powerTexture = new THREE.TextureLoader().load(require('../../imgs/map/powerStation_02.png'));
       }else if(index == 2){
-        powerTexture = new THREE.TextureLoader().load(require('../../map/powerStation_01.png'));
+        powerTexture = new THREE.TextureLoader().load(require('../../imgs/map/powerStation_01.png'));
       }else{
-        powerTexture = new THREE.TextureLoader().load(require('../../map/powerStation_02.png'));
+        powerTexture = new THREE.TextureLoader().load(require('../../imgs/map/powerStation_02.png'));
       }
 
       if (rpxArr.length > 0) {
