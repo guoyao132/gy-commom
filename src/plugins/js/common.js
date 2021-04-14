@@ -933,6 +933,27 @@ _obj:需删除的对象
     } else {
       return result[sKey] || '';
     }
+  },
+  addClass(elm, newClass) {
+    var classes = elm.className.split(' ');
+    var classIndex = this.hasClass(elm, newClass);
+    if (classIndex == -1) classes.push(newClass);
+    elm.className = classes.join(' ');
+  },
+
+  hasClass(elm, className) {
+    var classes = elm.className.split(' ');
+    for (var a in classes) {
+      if (classes[a] == className) return a;
+    }
+    return -1;
+  },
+
+  delClass(elm, className) {
+    var classes = elm.className.split(' ');
+    var classIndex = this.hasClass(elm, className);
+    if (classIndex != -1) classes.splice(classIndex, 1);
+    elm.className = classes.join(' ');
   }
 
 }

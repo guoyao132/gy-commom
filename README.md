@@ -170,3 +170,18 @@ params:
 params: 
     sKey
 ```
+### 添加className(addClass)
+```
+params: 
+    sKey
+```
+### 判断有无className(hasClass)
+```
+params: 
+    sKey
+```
+### 删除className(delClass)
+```
+params: 
+    sKey
+```
